@@ -15,9 +15,9 @@ public class MyChronometer extends Chronometer {
     private long milliseconds;
 
     private int currentWorkout = 0;
-    private int numWorkouts = 2;
-    private final int secondsPerWorkout = 5;
-    private final int secondsPerRest = 3;
+    private int numWorkouts = 8;
+    private final int secondsPerWorkout = 20;
+    private final int secondsPerRest = 10;
 
     private OnMyChronometerTickListener mOnMyChronometerTickListener;
 
@@ -34,8 +34,6 @@ public class MyChronometer extends Chronometer {
             @Override
             public void onChronometerTick(Chronometer chronometer) {
                 milliseconds = SystemClock.elapsedRealtime() - chronometer.getBase();
-                System.out.println("AAA");
-                System.out.println(milliseconds);
                 updateStatuses();
                 dispatchChronometerTick();
             }
@@ -101,19 +99,18 @@ public class MyChronometer extends Chronometer {
     private void updateStatuses() {
         if (isRunning) {
             if (currentStatus == Status.WORKOUT) {
-                if (getSeconds() == secondsPerWorkout) {
+                if (getSeconds() > secondsPerWorkout) {
                     currentStatus = Status.REST;
                     this.reset();
                 }
             } else if (currentStatus == Status.REST) {
-                if (getSeconds() == secondsPerRest) {
+                if (getSeconds() > secondsPerRest) {
                     currentStatus = Status.WORKOUT;
                     this.currentWorkout++;
                     this.reset();
                 }
             }
             if (currentWorkout > numWorkouts) {
-                System.out.println("ZZZZ: " + currentWorkout + "/" + numWorkouts);
                 this.restart();
             }
         }
@@ -138,6 +135,17 @@ public class MyChronometer extends Chronometer {
         return (int) (milliseconds / 1000);
     }
 
+    public int getTotalSeconds() {
+        int total = 0;
+        if (this.currentStatus == Status.WORKOUT) {
+            return (this.currentWorkout) * (this.secondsPerWorkout + this.secondsPerRest) + this.getSeconds() - this.secondsPerWorkout - this.secondsPerRest;
+        } else if (this.currentStatus == Status.REST) {
+            return (this.currentWorkout) * (this.secondsPerWorkout + this.secondsPerRest) + this.getSeconds() - this.secondsPerRest;
+        } else {
+            return 0;
+        }
+    }
+
     public int getCurrentWorkout() {
         return currentWorkout;
     }
@@ -152,6 +160,14 @@ public class MyChronometer extends Chronometer {
 
     public boolean isRunning() {
         return isRunning;
+    }
+
+    public int getSecondsPerWorkout() {
+        return secondsPerWorkout;
+    }
+
+    public int getSecondsPerRest() {
+        return secondsPerRest;
     }
 }
 
